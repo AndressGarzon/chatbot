@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session
-import openai
+from openai import OpenAI  # ← Import correcto para v1.x
 from dotenv import load_dotenv
 import os
 import time
@@ -25,8 +25,8 @@ app.secret_key = os.getenv("SECRET_KEY", "clave_secreta_desarrollo_2024")
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutos
 
-# Configurar API key de OpenAI (sintaxis para versión 0.28.1)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Crear cliente con la API key (SINTAXIS CORRECTA para v1.x)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class VeterinarioChatbotAvanzado:
     def __init__(self):
@@ -186,8 +186,8 @@ Máximo 80-100 palabras. Balanceado y claro."""
             # Agregar la nueva pregunta al historial
             mensajes.append({"role": "user", "content": pregunta})
             
-            # Sintaxis para openai 0.28.1
-            respuesta = openai.ChatCompletion.create(
+            # SINTAXIS CORRECTA para openai>=1.0.0
+            respuesta = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=mensajes,
                 temperature=0.7,
@@ -195,7 +195,7 @@ Máximo 80-100 palabras. Balanceado y claro."""
                 top_p=0.9
             )
             
-            respuesta_texto = respuesta.choices[0].message['content']
+            respuesta_texto = respuesta.choices[0].message.content
             response_time = time.time() - start_time
             
             # Actualizar estadísticas
